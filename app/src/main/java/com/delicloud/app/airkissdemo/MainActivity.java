@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 
 import rx.Observable;
@@ -89,11 +91,20 @@ public class MainActivity extends AppCompatActivity {
                 byte DUMMY_DATA[] = new byte[1500];
                 AirKissEncoder airKissEncoder = new AirKissEncoder(ssid, password);
                 DatagramSocket sendSocket = null;
+
+                //debug purpose,
+                SocketAddress socketAddress = new InetSocketAddress("192.168.43.1", 10000);
+
                 //for (int j=0; j<3; j++){
                     //Log.d("==My Debug==", "UDP Send Retry Times:" + j);
                     try {
-                        sendSocket = new DatagramSocket();
+                        sendSocket = new DatagramSocket(socketAddress);
                         sendSocket.setBroadcast(true);
+
+                        //debug purpose
+                        InetAddress localAddress = sendSocket.getLocalAddress();
+                        System.out.println("Local address: " + localAddress.getHostAddress());
+
                         int encoded_data[] = airKissEncoder.getEncodedData();
                         for (int i = 0; i < encoded_data.length; ++i) {
                             DatagramPacket pkg = new DatagramPacket(DUMMY_DATA,
@@ -143,8 +154,10 @@ public class MainActivity extends AppCompatActivity {
             public void call(Subscriber<? super String> subscriber) {
                 byte[] buffer = new byte[15000];
                 DatagramSocket udpServerSocket = null;
+                //debug purpose
+                SocketAddress socketAddress = new InetSocketAddress("192.168.43.1", 10001);
                 try {
-                    udpServerSocket = new DatagramSocket(24333);
+                    udpServerSocket = new DatagramSocket(socketAddress);
                     udpServerSocket.setSoTimeout(1000 * 60);
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     while (true) {
