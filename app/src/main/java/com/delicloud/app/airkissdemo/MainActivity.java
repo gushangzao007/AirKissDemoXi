@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                     ssid = ssid.replaceAll("^\"|\"$", "");
                 }
                 mSSIDEditText.setText(ssid);
-                mSSIDEditText.setEnabled(false);
+                mSSIDEditText.setEnabled(true);
 
             }
         }
@@ -89,26 +89,31 @@ public class MainActivity extends AppCompatActivity {
                 byte DUMMY_DATA[] = new byte[1500];
                 AirKissEncoder airKissEncoder = new AirKissEncoder(ssid, password);
                 DatagramSocket sendSocket = null;
-                try {
-                    sendSocket = new DatagramSocket();
-                    sendSocket.setBroadcast(true);
-                    int encoded_data[] = airKissEncoder.getEncodedData();
-                    for (int i = 0; i < encoded_data.length; ++i) {
-                        DatagramPacket pkg = new DatagramPacket(DUMMY_DATA,
-                                encoded_data[i],
-                                InetAddress.getByName("255.255.255.255"),
-                                10000);
-                        sendSocket.send(pkg);
-                        Thread.sleep(4);
+                //for (int j=0; j<3; j++){
+                    //Log.d("==My Debug==", "UDP Send Retry Times:" + j);
+                    try {
+                        sendSocket = new DatagramSocket();
+                        sendSocket.setBroadcast(true);
+                        int encoded_data[] = airKissEncoder.getEncodedData();
+                        for (int i = 0; i < encoded_data.length; ++i) {
+                            DatagramPacket pkg = new DatagramPacket(DUMMY_DATA,
+                                    encoded_data[i],
+                                    InetAddress.getByName("255.255.255.255"),
+                                    //InetAddress.getByName("224.0.0.1"),
+                                    10000);
+                            sendSocket.send(pkg);
+                            Thread.sleep(4);
+                        }
+                        subscriber.onCompleted();
+                    } catch (Exception e) {
+                        subscriber.onError(e);
+                        e.printStackTrace();
+                    } finally {
+                        sendSocket.close();
+                        sendSocket.disconnect();
                     }
-                    subscriber.onCompleted();
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                    e.printStackTrace();
-                } finally {
-                    sendSocket.close();
-                    sendSocket.disconnect();
-                }
+                //}
+
             }
         })
                 .subscribeOn(Schedulers.io())
