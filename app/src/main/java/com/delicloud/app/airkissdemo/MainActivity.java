@@ -49,21 +49,37 @@ public class MainActivity extends AppCompatActivity {
         mPasswordEditText = (EditText) findViewById(R.id.passwordEditText);
 
         Context context = getApplicationContext();
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo.isConnected()) {
-            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
-            if (connectionInfo != null) {
-                String ssid = connectionInfo.getSSID();
-                if (Build.VERSION.SDK_INT >= 17 && ssid.startsWith("\"") && ssid.endsWith("\"")) {
-                    ssid = ssid.replaceAll("^\"|\"$", "");
-                }
-                mSSIDEditText.setText(ssid);
-                mSSIDEditText.setEnabled(true);
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
-            }
+        if (wifiInfo.getNetworkId() == -1) {
+            // 当前手机未连接到wifi
+            // TODO: 处理未连接到wifi的情况
+            Toast.makeText(MainActivity.this, "没有连接到任何wifi，请检查网络", Toast.LENGTH_SHORT).show();
+        } else {
+            String ssid = wifiInfo.getSSID();
+            // TODO: 处理已连接到wifi的情况
+            mSSIDEditText.setText(ssid);
+            mSSIDEditText.setEnabled(true);
         }
+
+
+//        Context context = getApplicationContext();
+//        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+//        if (networkInfo.isConnected()) {
+//            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+//            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+//            if (connectionInfo != null) {
+//                String ssid = connectionInfo.getSSID();
+//                if (Build.VERSION.SDK_INT >= 17 && ssid.startsWith("\"") && ssid.endsWith("\"")) {
+//                    ssid = ssid.replaceAll("^\"|\"$", "");
+//                }
+//                mSSIDEditText.setText(ssid);
+//                mSSIDEditText.setEnabled(true);
+//
+//            }
+//        }
     }
 
     public void onConnectBtnClick(View view) {
